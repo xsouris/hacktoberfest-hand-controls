@@ -51,11 +51,11 @@ class MainWindow:
         self.box5 = Text(optionsFrame, height=1, width=35, font=customFont)
         self.box5.grid(row=4, column = 1, padx=20,pady=14)
 
-        self.text6 = Label(optionsFrame, text="Peace",font=customFont)
-        self.text6.grid(row = 5, column = 0, padx=20, pady=14)
+        #self.text6 = Label(optionsFrame, text="Peace",font=customFont)
+        #self.text6.grid(row = 5, column = 0, padx=20, pady=14)
 
-        self.box6 = Text(optionsFrame, height=1, width=35, font=customFont)
-        self.box6.grid(row=5, column = 1, padx=20,pady=14)
+        #self.box6 = Text(optionsFrame, height=1, width=35, font=customFont)
+        #self.box6.grid(row=5, column = 1, padx=20,pady=14)
 
 
         buttonClear = Button(optionsFrame, text="Clear", font=customFont, command=self.clear)
@@ -81,9 +81,9 @@ class MainWindow:
 
 
     def Apply(self):
-        textList = ["Swipe Up","Swipe Down","Swipe Left","Swipe Right","Fist","Peace"]
+        textList = ["Swipe Up","Swipe Down","Swipe Left","Swipe Right","Fist"]
         boxList = [
-            self.box1, self.box2, self.box3, self.box4, self.box5,self.box6
+            self.box1, self.box2, self.box3, self.box4, self.box5
             ]
         answer = messagebox.askyesno(title= "Confirmation",
                                      message="Are you sure?",

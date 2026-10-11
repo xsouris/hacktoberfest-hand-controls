@@ -3,4 +3,3 @@ Swipe Down:
 Swipe Left: 
 Swipe Right: 
 Fist: 
-Peace: 
