@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from tkinter import *
+from PIL import Image, ImageTk
 
 cap = cv2.VideoCapture(0)
 while True:
