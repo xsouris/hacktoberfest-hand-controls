@@ -5,6 +5,7 @@ from collections import deque
 from pathlib import Path
 import os
 import tkwindow
+import pyautogui
 
 # ---------------- Configuration ----------------
 MODEL_PATH = Path(__file__).with_name("hand_landmarker.task")
@@ -41,6 +42,9 @@ positions = deque()
 last_gesture_time = 0.0
 gesture_text = "Show your hand"
 
+# [x, y] arrays of the cursor position of the previous and current frames
+pointers = {"prev": None, "curr": None}
+
 
 def recognize_gesture(landmarks):
     """Recognize a fist gesture or thumbs-up gesture based on hand landmarks."""
@@ -57,7 +61,7 @@ def recognize_motion(history, now):
     """Recognize a swipe using hand movement over time."""
     if len(history) < 2:
         return None
-
+    
     start_t, start_x, start_y = history[0]
     end_t, end_x, end_y = history[-1]
 
@@ -77,6 +81,17 @@ def recognize_motion(history, now):
             return "Swipe Down" if dy > 0 else "Swipe Up"
 
     return None
+
+# moves the mouse if the pointer gesture is detected
+def move_mouse(pointers):
+    # just return if this is the first frame 
+    if pointers["prev"] == None:
+        return
+
+    dx = pointers["curr"][0] - pointers["prev"][0]
+    dy = pointers["curr"][1] - pointers["prev"][1]
+
+    pyautogui.moveRel(dy, dx)
 
 
 def main():
@@ -137,6 +152,8 @@ def main():
 
                     # Landmark 0 is the wrist
                     wrist = landmarks[0]
+                    # Landmark 8 is the index which we're gonna use for moving mouse
+                    pointers["curr"] = landmarks[8]
                     x, y = wrist.x, wrist.y
 
                     positions.append((now, x, y))
@@ -170,8 +187,13 @@ def main():
                         gesture = recognize_gesture(landmarks)
 
                         if gesture:
+                            if gesture == "point":
+                                move_mouse(pointers)
+                                pointers["prev"] = pointers["curr"]
+
                             gesture_text = gesture   
                             last_gesture_time = now
+
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
 
