@@ -2,6 +2,8 @@ import tkinter
 import tkinter.font as TkFont
 from tkinter import *
 from tkinter import messagebox
+import json
+
 
 class MainWindow:
     def __init__(self):
@@ -10,7 +12,7 @@ class MainWindow:
 
         self.window = Tk()
         self.window.title("Gesture selector")
-        self.window.geometry("1000x500")
+        self.window.geometry("1000x550")
         self.window.resizable (False,False)
         self.window.config(background="darkgray")
     
@@ -49,12 +51,18 @@ class MainWindow:
         self.box5 = Text(optionsFrame, height=1, width=35, font=customFont)
         self.box5.grid(row=4, column = 1, padx=20,pady=14)
 
+        self.text6 = Label(optionsFrame, text="Peace",font=customFont)
+        self.text6.grid(row = 5, column = 0, padx=20, pady=14)
+
+        self.box6 = Text(optionsFrame, height=1, width=35, font=customFont)
+        self.box6.grid(row=5, column = 1, padx=20,pady=14)
+
 
         buttonClear = Button(optionsFrame, text="Clear", font=customFont, command=self.clear)
         buttonClear.grid(row = 2, column = 3, padx=10)
 
         buttonApply = Button(optionsFrame, text = "Apply", font=customFont,command=self.Apply)
-        buttonApply.grid(row = 5, column = 1, padx=50, pady=(0,5))
+        buttonApply.grid(row = 6, column = 1, padx=50, pady=(0,5))
 
 
     def clear(self):
@@ -63,11 +71,14 @@ class MainWindow:
         self.box3.delete("1.0",END)
         self.box4.delete("1.0",END)
         self.box5.delete("1.0",END)
+        self.box6.delete("1.0",END)
 
 
     def Apply(self):
 
-        boxList = [self.box1, self.box2, self.box3, self.box4, self.box5]
+        boxList = [
+            self.box1, self.box2, self.box3, self.box4, self.box5,self.box6
+            ]
         answer = messagebox.askyesno(title= "Confirmation",
                                      message="Are you sure?",
                                      icon="warning",
@@ -81,7 +92,18 @@ class MainWindow:
                 else:
                     self.commandsList.append('')
         
-        print(self.commandsList)
+        
+        jsonCommands = json.dumps(self.commandsList, indent=4)
+
+
+        #settings is now all the appropraite commands
+        with open("savedSettings.json","w") as f:
+            json.dump(jsonCommands,"savedSettings.json")
+        
+        self.window.destroy()
+        
+
+
 
     def run(self):
         self.window.mainloop()
