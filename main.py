@@ -36,7 +36,7 @@ gesture_text = "Show your hand"
 
 
 def recognize_gesture(landmarks):
-    """Recognize a fist gesture or peace gesture based on hand landmarks."""
+    """Recognize a gesture based on hand landmarks."""
     # Fist: All fingers are curled
     if all(
         landmarks[i].y > landmarks[i - 2].y
@@ -51,6 +51,14 @@ def recognize_gesture(landmarks):
         landmarks[20].y > landmarks[18].y
     ):
         return "Peace"
+
+    # Point: Index finger is up, others are down
+    if (landmarks[8].y < landmarks[6].y and
+        landmarks[12].y > landmarks[10].y and
+        landmarks[16].y > landmarks[14].y and
+        landmarks[20].y > landmarks[18].y
+    ):
+        return "Point"
 
     return None
 
@@ -166,20 +174,24 @@ def main():
 
                     if now - last_gesture_time >= COOLDOWN_SECONDS:
                         detected = recognize_motion(positions, now)
+                        gesture = recognize_gesture(landmarks)
 
-                        if detected:
+                        if detected and gesture != "Point":
                             gesture_text = detected
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
+                        elif gesture == "Point" and detected:
+                            gesture_text = "Point"
+                            last_gesture_time = now
+                            positions.clear()
 
-                        gesture = recognize_gesture(landmarks)
-
-                        if gesture:
+                        if gesture and gesture != "Point":
                             gesture_text = gesture   
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
+                        
 
                 else:
                     positions.clear()
