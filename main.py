@@ -198,14 +198,14 @@ def main():
                     if now - last_gesture_time >= COOLDOWN_SECONDS:
 
 
-                        if detected and gesture != "Point":
+                        if detected and gesture != "Point" and gesture != "Peace":
                             gesture_text = detected
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
                         
 
-                        if gesture and gesture != "Point":
+                        if gesture and gesture != "Point" and gesture != "Peace":
                             gesture_text = gesture   
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
@@ -219,6 +219,13 @@ def main():
                         gesture_text = "Point"
                         last_gesture_time = now
                         positions.clear()
+                    elif gesture == "Peace":
+                        pyautogui.click()
+                    else:
+                        pointers["prev"] = None 
+
+
+                    
 
                 else:
                     positions.clear()
