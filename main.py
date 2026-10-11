@@ -5,6 +5,7 @@ from collections import deque
 from pathlib import Path
 import os
 import tkwindow
+import pyautogui
 
 # ---------------- Configuration ----------------
 MODEL_PATH = Path(__file__).with_name("hand_landmarker.task")
@@ -33,6 +34,9 @@ options = HandLandmarkerOptions(
 positions = deque()
 last_gesture_time = 0.0
 gesture_text = "Show your hand"
+
+
+pointers = {"prev": None, "curr": None}
 
 
 def recognize_gesture(landmarks):
@@ -86,6 +90,20 @@ def recognize_motion(history, now):
             return "Swipe Down" if dy > 0 else "Swipe Up"
 
     return None
+
+# moves the mouse if the pointer gesture is detected
+def move_mouse(pointers):
+    # just return if this is the first frame 
+    try:
+        if pointers["prev"] == None:
+            return
+
+        dx = pointers["curr"].x - pointers["prev"].x
+        dy = pointers["curr"].y - pointers["prev"].y
+
+        pyautogui.moveRel(dx*4000, dy*4000)
+    except:
+        pass
 
 
 def main():
@@ -153,6 +171,8 @@ def main():
                     wrist = landmarks[0]
                     x, y = wrist.x, wrist.y
 
+                    pointers["curr"] = landmarks[8]
+
                     positions.append((now, x, y))
 
                     # Keep only recent positions
@@ -172,26 +192,33 @@ def main():
                             frame, (px, py), 4, (0, 255, 0), -1
                         )
 
+                    detected = recognize_motion(positions, now)
+                    gesture = recognize_gesture(landmarks)
+
                     if now - last_gesture_time >= COOLDOWN_SECONDS:
-                        detected = recognize_motion(positions, now)
-                        gesture = recognize_gesture(landmarks)
+
 
                         if detected and gesture != "Point":
                             gesture_text = detected
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
-                        elif gesture == "Point" and detected:
-                            gesture_text = "Point"
-                            last_gesture_time = now
-                            positions.clear()
+                        
 
                         if gesture and gesture != "Point":
                             gesture_text = gesture   
                             last_gesture_time = now
                             os.system(COMMANDS.get(gesture_text))
                             positions.clear()
-                        
+
+                    #last_gesture = gesture_text
+
+                    if gesture == "Point":
+                        move_mouse(pointers)
+                        pointers["prev"] = pointers["curr"]
+                        gesture_text = "Point"
+                        last_gesture_time = now
+                        positions.clear()
 
                 else:
                     positions.clear()
