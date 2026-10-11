@@ -30,6 +30,21 @@ positions = deque()
 last_gesture_time = 0.0
 gesture_text = "Show your hand"
 
+def recognize_fist(landmarks):
+    """Recognize a fist gesture based on hand landmarks."""
+    if len(landmarks) < 21:
+        return False
+
+    # Check if all fingers are folded (tip below MCP joint)
+    finger_tips = [landmarks[i] for i in [8, 12, 16, 20]]  # Index, Middle, Ring, Pinky tips
+    finger_mcp = [landmarks[i] for i in [5, 9, 13, 17]]     # Corresponding MCP joints
+
+    for tip, mcp in zip(finger_tips, finger_mcp):
+        if tip.y < mcp.y:  # If tip is above MCP joint (y decreases upwards)
+            return False
+
+    return True
+
 def recognize_motion(history, now):
     """Recognize a swipe using hand movement over time."""
     if len(history) < 2:
@@ -139,6 +154,11 @@ def main():
                             gesture_text = detected
                             last_gesture_time = now
                             positions.clear()
+
+                    if recognize_fist(landmarks):
+                        gesture_text = "Fist"
+                        last_gesture_time = now
+                        positions.clear()
                 else:
                     positions.clear()
                     gesture_text = "Show your hand"
