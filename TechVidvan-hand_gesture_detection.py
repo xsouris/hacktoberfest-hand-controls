@@ -7,6 +7,7 @@ import numpy as np
 import mediapipe as mp
 import tensorflow as tf
 from tensorflow.keras.models import load_model
+import pyautogui
 
 # initialize mediapipe
 mpHands = mp.solutions.hands
@@ -26,11 +27,18 @@ print(classNames)
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
 
+# need to keep track of the previous mouse position to calculate the movement
+prevmouseX, prevmouseY = None, None
+
 while True:
     # Read each frame from the webcam
     _, frame = cap.read()
 
     x, y, c = frame.shape
+
+    # get the position of the mouse
+    mouseX, mouseY = pyautogui.position()
+
 
     # Flip the frame vertically
     frame = cv2.flip(frame, 1)
@@ -46,16 +54,34 @@ while True:
     # post process the result
     if result.multi_hand_landmarks:
         landmarks = []
+        i = 0
         for handslms in result.multi_hand_landmarks:
             for lm in handslms.landmark:
                 # print(id, lm)
                 lmx = int(lm.x * x)
                 lmy = int(lm.y * y)
+                # index 8 should be the tip of the index finger, we will use this to control the mouse
+                if i == 8:
+                    index = [lmx, lmy]
+                    i += 1
 
                 landmarks.append([lmx, lmy])
 
+            if prevmouseX is not None and prevmouseY is not None:
+                # calculate the movement of the mouse
+                dx = index[0] - prevmouseX
+                dy = index[1] - prevmouseY
+
+                # move the mouse
+                pyautogui.moveRel(dx, dy)
+
+            # set the mouse position of this frame as the previous mouse position for the next frame
+            prevmouseX, prevmouseY = mouseX, mouseY
+            
+
             # Drawing landmarks on frames
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
+
 
             # Predict gesture
             prediction = model.predict([landmarks])
