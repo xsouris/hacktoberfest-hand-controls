@@ -219,6 +219,10 @@ def main():
                         gesture_text = "Point"
                         last_gesture_time = now
                         positions.clear()
+                    else:
+                        pointers["prev"] = None 
+
+                    
 
                 else:
                     positions.clear()
