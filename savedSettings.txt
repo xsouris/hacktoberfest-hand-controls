@@ -1,0 +1,6 @@
+Swipe Up: echo '1'
+Swipe Down: echo '2'
+Swipe Left: echo '3'
+Swipe Right: 
+Fist: 
+Peace: 

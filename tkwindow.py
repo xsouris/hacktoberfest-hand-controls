@@ -75,7 +75,7 @@ class MainWindow:
 
 
     def Apply(self):
-
+        textList = ["Swipe Up","Swipe Down","Swipe Left","Swipe Right","Fist","Peace"]
         boxList = [
             self.box1, self.box2, self.box3, self.box4, self.box5,self.box6
             ]
@@ -93,12 +93,13 @@ class MainWindow:
                     self.commandsList.append('')
         
         
-        jsonCommands = json.dumps(self.commandsList, indent=4)
-
+        jsonCommands = json.dumps(self.commandsList)
+        print(jsonCommands)
 
         #settings is now all the appropraite commands
-        with open("savedSettings.json","w") as f:
-            json.dump(jsonCommands,"savedSettings.json")
+        with open("savedSettings.txt","w") as f:
+            for i in range(len(textList)):
+                f.write(f"{textList[i]}: {self.commandsList[i]}")
         
         self.window.destroy()
         

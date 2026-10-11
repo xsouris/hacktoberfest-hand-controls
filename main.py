@@ -13,14 +13,7 @@ WINDOW_SECONDS = 0.45
 SWIPE_THRESHOLD = 0.22   # Normalized image distance
 COOLDOWN_SECONDS = 0.8
 
-COMMANDS = {
-    "Swipe Left": "echo 'Swipe Left detected!'",
-    "Swipe Right": "echo 'Swipe Right detected!'",
-    "Swipe Up": "echo 'Swipe Up detected!'",
-    "Swipe Down": "echo 'Swipe Down detected!'",
-    "Fist": "echo 'Fist detected!'",
-    "Peace": "echo 'Peace detected!'",
-}
+COMMANDS = {}
 
 # MediaPipe setup
 BaseOptions = mp.tasks.BaseOptions
@@ -107,6 +100,11 @@ def main():
 
     windows = tkwindow.MainWindow()
     windows.run()
+
+    with open("savedSettings.txt", "r") as f:
+        for line in f:
+            gesture, command = line.strip().split(":", 1)
+            COMMANDS[gesture.strip()] = command.strip()
 
     try:
         with HandLandmarker.create_from_options(options) as detector:
