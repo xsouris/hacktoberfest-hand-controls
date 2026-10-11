@@ -3,6 +3,8 @@ import mediapipe as mp
 import time
 from collections import deque
 from pathlib import Path
+import os
+import tkwindow
 
 # ---------------- Configuration ----------------
 MODEL_PATH = Path(__file__).with_name("hand_landmarker.task")
@@ -10,6 +12,15 @@ MODEL_PATH = Path(__file__).with_name("hand_landmarker.task")
 WINDOW_SECONDS = 0.45
 SWIPE_THRESHOLD = 0.22   # Normalized image distance
 COOLDOWN_SECONDS = 0.8
+
+COMMANDS = {
+    "Swipe Left": "echo 'Swipe Left detected!'",
+    "Swipe Right": "echo 'Swipe Right detected!'",
+    "Swipe Up": "echo 'Swipe Up detected!'",
+    "Swipe Down": "echo 'Swipe Down detected!'",
+    "Fist": "echo 'Fist detected!'",
+    "Thumbs Up": "echo 'Thumbs Up detected!'"
+}
 
 # MediaPipe setup
 BaseOptions = mp.tasks.BaseOptions
@@ -30,20 +41,17 @@ positions = deque()
 last_gesture_time = 0.0
 gesture_text = "Show your hand"
 
-def recognize_fist(landmarks):
-    """Recognize a fist gesture based on hand landmarks."""
-    if len(landmarks) < 21:
-        return False
 
-    # Check if all fingers are folded (tip below MCP joint)
-    finger_tips = [landmarks[i] for i in [8, 12, 16, 20]]  # Index, Middle, Ring, Pinky tips
-    finger_mcp = [landmarks[i] for i in [5, 9, 13, 17]]     # Corresponding MCP joints
+def recognize_gesture(landmarks):
+    """Recognize a fist gesture or thumbs-up gesture based on hand landmarks."""
+    # Fist: All fingers are curled
+    if all(
+        landmarks[i].y > landmarks[i - 2].y
+        for i in [8, 12, 16, 20]
+    ):
+        return "Fist"
 
-    for tip, mcp in zip(finger_tips, finger_mcp):
-        if tip.y < mcp.y:  # If tip is above MCP joint (y decreases upwards)
-            return False
-
-    return True
+    return None
 
 def recognize_motion(history, now):
     """Recognize a swipe using hand movement over time."""
@@ -61,7 +69,7 @@ def recognize_motion(history, now):
 
     # Pick the dominant direction of movement
     if abs(dx) >= abs(dy):
-        if abs(dx) >= SWIPE_THRESHOLD:
+        if abs(dx) >= SWIPE_THRESHOLD:     
             return "Swipe Right" if dx > 0 else "Swipe Left"
     else:
         if abs(dy) >= SWIPE_THRESHOLD:
@@ -88,6 +96,9 @@ def main():
 
     start_time = time.monotonic()
     previous_timestamp_ms = -1
+
+    windows = tkwindow.MainWindow()
+    windows.run()
 
     try:
         with HandLandmarker.create_from_options(options) as detector:
@@ -153,12 +164,17 @@ def main():
                         if detected:
                             gesture_text = detected
                             last_gesture_time = now
+                            os.system(COMMANDS.get(gesture_text))
                             positions.clear()
 
-                    if recognize_fist(landmarks):
-                        gesture_text = "Fist"
-                        last_gesture_time = now
-                        positions.clear()
+                        gesture = recognize_gesture(landmarks)
+
+                        if gesture:
+                            gesture_text = gesture   
+                            last_gesture_time = now
+                            os.system(COMMANDS.get(gesture_text))
+                            positions.clear()
+
                 else:
                     positions.clear()
                     gesture_text = "Show your hand"
