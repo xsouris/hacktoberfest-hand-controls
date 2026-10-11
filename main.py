@@ -19,7 +19,7 @@ COMMANDS = {
     "Swipe Up": "echo 'Swipe Up detected!'",
     "Swipe Down": "echo 'Swipe Down detected!'",
     "Fist": "echo 'Fist detected!'",
-    "Thumbs Up": "echo 'Thumbs Up detected!'"
+    "Peace": "echo 'Peace detected!'",
 }
 
 # MediaPipe setup
@@ -43,13 +43,21 @@ gesture_text = "Show your hand"
 
 
 def recognize_gesture(landmarks):
-    """Recognize a fist gesture or thumbs-up gesture based on hand landmarks."""
+    """Recognize a fist gesture or peace gesture based on hand landmarks."""
     # Fist: All fingers are curled
     if all(
         landmarks[i].y > landmarks[i - 2].y
         for i in [8, 12, 16, 20]
     ):
         return "Fist"
+
+    # Peace: Index and middle fingers are up, others are down
+    if (landmarks[8].y < landmarks[6].y and
+        landmarks[12].y < landmarks[10].y and
+        landmarks[16].y > landmarks[14].y and
+        landmarks[20].y > landmarks[18].y
+    ):
+        return "Peace"
 
     return None
 
