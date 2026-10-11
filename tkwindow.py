@@ -12,7 +12,7 @@ class MainWindow:
 
         self.window = Tk()
         self.window.title("Gesture selector")
-        self.window.geometry("1000x550")
+        self.window.geometry("1100x600")
         self.window.resizable (False,False)
         self.window.config(background="darkgray")
     
@@ -64,6 +64,12 @@ class MainWindow:
         buttonApply = Button(optionsFrame, text = "Apply", font=customFont,command=self.Apply)
         buttonApply.grid(row = 6, column = 1, padx=50, pady=(0,5))
 
+        buttonLast = Button(optionsFrame, text = "Use Last \n Settings", font=customFont,command=self.stop)
+        buttonLast.grid(row = 6, column = 2, padx=0,pady=(0,5))
+
+
+    def stop(self):
+        self.window.destroy()
 
     def clear(self):
         self.box1.delete("1.0",END)
